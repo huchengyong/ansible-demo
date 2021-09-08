@@ -27,6 +27,31 @@ yum_data_dir: /data/repo/yum/
 ```
 [root@localhost service]# ansible-playbook playbooks/yum_server.yml  
 ```
+备注：执行之前需检查yum-server是否能curl通  124.236.120.248:50001/ctyun 如果不通则无法进行同步
+```
+[root@linux-node13 ~]# curl 124.236.120.248:50001/ctyun
+<html>
+<head><title>301 Moved Permanently</title></head>
+<body bgcolor="white">
+<center><h1>301 Moved Permanently</h1></center>
+<hr><center>nginx/1.12.2</center>
+</body>
+</html>
+```
+
+4.验证部署是否成功
+```
+如果出现一下定时任务则表示成功
+[root@linux-node13 ~]# crontab -l
+#Ansible: Clean system mem
+00 */1 * * * /bin/sh /etc/scripts/clean_mem.sh
+#Ansible: Rsync yum ctyun os
+10 */2 * * * flock -xn /var/run/pull_yum_rsync.lock -c "/bin/sh /script/pull_yum_rsync.sh &>/dev/null"
+```
+5.同步文件数据
+```
+/bin/sh /script/pull_yum_rsync.sh
+```
 
 
 
