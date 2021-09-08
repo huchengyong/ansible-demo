@@ -1,0 +1,12 @@
+---
+- name: install iptables.service
+  yum: name=iptables-services state=latest
+
+- name: start ip_forward
+  shell: sed -i "/ip_forward/d" /etc/sysctl.conf ; echo "net.ipv4.ip_forward = 1" >>/etc/sysctl.conf ; sysctl -p 
+  ignore_errors: True
+
+- name: Start iptables service
+  shell: iptables -t nat -I POSTROUTING -s 0.0.0.0/0 -j MASQUERADE ; iptables-save >/etc/sysconfig/iptables ; iptables -t nat -S ; systemctl enable iptables
+  ignore_errors: True
+

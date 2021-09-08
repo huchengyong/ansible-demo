@@ -1,0 +1,9 @@
+---
+- name: Create yum data dir
+  file: path=/etc/scripts/ state=directory
+
+- name: Copy clean mem scripts
+  template: src=clean_mem.sh.j2 dest=/etc/scripts/clean_mem.sh
+
+- name: Crontab clean mem scripts
+  cron: name='Clean system mem' minute=00 hour=*/1 day=* month=* weekday=* job="/bin/sh /etc/scripts/clean_mem.sh"

@@ -1,0 +1,232 @@
+#!/bin/bash
+
+cat >/tmp/cobbler_list.txt<<EOF
+###
+
+EOF
+
+cat >/tmp/cobbler_ip_list.txt<<EOF
+
+EOF
+
+cobbler_list_dir="/tmp/cobbler_list.txt"
+cobbler_ip_list_dir="/tmp/cobbler_ip_list.txt"
+cobbler_list_count=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|wc -l)
+cobbler_ip_list_count=$(cat $cobbler_ip_list_dir|grep -Ev "(^#|^$)"|wc -l)
+
+cobbler_auto () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        MAC=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $1}'|xargs)
+        INTERFACE=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $2}'|xargs)
+        IPADDR=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk 'NR=='$n' {print $3}'|xargs)
+        NETMASK=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk 'NR=='$n' {print $4}'|xargs)
+        GATEWAY=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk 'NR=='$n' {print $5}'|xargs)
+        HOST_NAME=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk 'NR=='$n' {print $6}'|xargs)
+        PROFILE=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk 'NR=='$n' {print $7}'|xargs)
+        timeout 10 cobbler system add --name=$HOST_NAME --mac=$MAC --profile=$PROFILE --ip-address=$IPADDR --subnet=$NETMASK --gateway=$GATEWAY --interface=$INTERFACE --static=1 --hostname=$HOST_NAME  &>/dev/null
+        timeout 30 cobbler system edit --name=$HOST_NAME --mac=$MAC --profile=$PROFILE --ip-address=$IPADDR --subnet=$NETMASK --gateway=$GATEWAY --interface=$INTERFACE --static=1 --hostname=$HOST_NAME &>/dev/null
+        if [ $? -eq 0 ];then
+           echo "== $IPADDR cobbler system edit is                         [ ok ]" 
+        else
+           echo "== $IPADDR cobbler system edit is                         [ faild ]" 
+        fi
+    done
+    cobbler sync &>/dev/null
+    rm -fr $cobbler_list_dir &>/dev/null
+}
+
+cobbler_profile_default () {
+    cobbler system add --name=default --profile=centos-7.2-x86_64
+    cobbler system edit --name=default --profile=centos-7.2-x86_64
+}
+
+cobbler_profile_del () {
+    cobbler_profile_list=$(cobbler system list|xargs)
+    for n in $cobbler_profile_list
+    do
+        cobbler system remove --name=$n &>/dev/null
+        if [ $? -eq 0 ];then
+           echo "== $IPADDR cobbler system profile del is                         [ ok ]" 
+        else
+           echo "== $IPADDR cobbler system profile del is                         [ faild ]" 
+        fi
+    done
+}
+
+ipmitool_status () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power status"
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power status
+        sleep 1
+    done
+    rm -fr $cobbler_list_dir
+}
+
+ipmitool_bios () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD chassis bootdev bios"
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power reset"
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD chassis bootdev bios
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power reset
+        sleep 1
+    done
+}
+
+ipmitool_pxe () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  chassis bootdev pxe"
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power reset"
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  chassis bootdev pxe
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power reset
+        sleep 1
+    done
+}
+
+ipmitool_reset () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power reset"
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power reset
+        sleep 1
+    done
+}
+
+ipmitool_poweroff () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power poweroff"
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power poweroff
+        sleep 1
+    done
+}
+
+ipmitool_poweron () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power on"
+        timeout 3 ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD  power on
+        sleep 1
+    done
+}
+
+ipmitool_useradd () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD user set name 4 admin01
+        ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD user set password 4 a1!a1!a1!1
+        ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD user priv 4 20
+        ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD user enable 4
+        sleep 1
+    done
+}
+
+ipmitool_userenable () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD user enable 4
+        sleep 1
+    done
+}
+
+ipmitool_userdisable () {
+    for n in `seq 1 $cobbler_list_count`
+    do
+        ILO_IP=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $8}'|xargs)
+        ILO_USER=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $9}'|xargs)
+        ILO_PASSWD=$(cat $cobbler_list_dir|grep -Ev "(^#|^$)"|awk  'NR=='$n' {print $10}'|xargs)
+        echo "=== $ILO_IP ==========================================================================="
+        ipmitool -I lanplus -H $ILO_IP -U $ILO_USER -P $ILO_PASSWD user disable 4
+        sleep 1
+    done
+}
+
+cobbler_ip_list (){
+    for n in `seq 1 $cobbler_ip_list_count`
+    do
+        ILO_IP=$(cat $cobbler_ip_list_dir|grep -Ev "(^#|^$)"|awk 'NR=='$n' {print $1}'|xargs)
+        echo "timeout 3 ipmitool -I lanplus -H $ILO_IP -U admin -P abc.ABC123  power status"
+    done
+}
+
+case $1 in
+    cobbler_auto)
+        cobbler_auto
+    ;;
+    cobbler_profile_default)
+        cobbler_profile_default
+    ;;
+    cobbler_profile_del)
+        cobbler_profile_del
+    ;;
+    ipmitool_status)
+        ipmitool_status
+    ;;
+    ipmitool_bios)
+        ipmitool_bios
+    ;;
+    ipmitool_pxe)
+        ipmitool_pxe
+    ;;
+    ipmitool_reset)
+        ipmitool_reset
+    ;;
+    ipmitool_poweroff)
+        ipmitool_poweroff
+    ;;
+    ipmitool_poweron)
+        ipmitool_poweron
+    ;;
+    ipmitool_useradd)
+        ipmitool_useradd
+    ;;
+    ipmitool_userenable)
+        ipmitool_userenable
+    ;;
+    ipmitool_userdisable)
+        ipmitool_userdisable
+    ;;
+    3)
+        cobbler_ip_list
+    ;;
+    *)
+        echo "please 1 and 2"
+    ;;
+esac
+
+rm -fr $cobbler_list_dir

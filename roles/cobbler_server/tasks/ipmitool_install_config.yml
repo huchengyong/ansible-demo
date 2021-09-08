@@ -1,0 +1,84 @@
+---
+- name: Copy ipmitool pkg
+  copy: src=ipmitool-1.8.14-99.dell.2771.12210.el7.x86_64.rpm dest=/tmp/ipmitool-1.8.14-99.dell.2771.12210.el7.x86_64.rpm
+  tags:
+    - ipmitool_status
+    - ipmitool_bios
+    - ipmitool_pxe
+    - ipmitool_reset
+    - ipmitool_poweroff
+    - ipmitool_poweron
+    - ipmitool_useradd
+    - ipmitool_userenable
+    - ipmitool_userdisable
+
+
+- name: Install ipmitool pkg
+  yum: name=/tmp/ipmitool-1.8.14-99.dell.2771.12210.el7.x86_64.rpm state=latest
+  tags:
+    - ipmitool_status
+    - ipmitool_bios
+    - ipmitool_pxe
+    - ipmitool_reset
+    - ipmitool_poweroff
+    - ipmitool_poweron
+    - ipmitool_useradd
+    - ipmitool_userenable
+    - ipmitool_userdisable
+
+- name: Load the ipmi module
+  shell: modprobe ipmi_si && modprobe ipmi_devintf && modprobe ipmi_msghandler
+  tags:
+    - ipmitool_status
+    - ipmitool_bios
+    - ipmitool_pxe
+    - ipmitool_reset
+    - ipmitool_poweroff
+    - ipmitool_poweron
+    - ipmitool_useradd
+    - ipmitool_userenable
+    - ipmitool_userdisable
+
+- name: Del ipmitool pkg
+  file: path=/tmp/ipmitool-1.8.14-99.dell.2771.12210.el7.x86_64.rpm
+  tags:
+    - ipmitool_status
+    - ipmitool_bios
+    - ipmitool_pxe
+    - ipmitool_reset
+    - ipmitool_poweroff
+    - ipmitool_poweron
+    - ipmitool_useradd
+    - ipmitool_userenable
+    - ipmitool_userdisable
+
+- name: Copy custom_mode_install_system.sh.j2 file to /tmp/
+  template: src=custom_mode_install_system.sh.j2 dest=/tmp/custom_mode_install_system.sh
+  tags:
+    - ipmitool_status
+    - ipmitool_bios
+    - ipmitool_pxe
+    - ipmitool_reset
+    - ipmitool_poweroff
+    - ipmitool_poweron
+    - ipmitool_useradd
+    - ipmitool_userenable
+    - ipmitool_userdisable
+
+- name: Insert tcp rule to /tmp/custom_mode_install_system.sh.j2
+  lineinfile:
+    path: /tmp/custom_mode_install_system.sh
+    insertafter: '^###'
+    line: '{{ item }}'
+  with_items:
+    - "{{ custom_mode_install_system_rule }}"
+  tags:
+    - ipmitool_status
+    - ipmitool_bios
+    - ipmitool_pxe
+    - ipmitool_reset
+    - ipmitool_poweroff
+    - ipmitool_poweron
+    - ipmitool_useradd
+    - ipmitool_userenable
+    - ipmitool_userdisable

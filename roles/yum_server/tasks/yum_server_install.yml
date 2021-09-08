@@ -1,0 +1,23 @@
+---
+- name: Create yum data dir
+  file: path={{ item }} state=directory
+  with_items:
+#    - /data/repo/centos/7.2/os/x86_64/
+#    - /data/repo/centos/7.3/os/x86_64/
+    - /data/repo/yum/ctyun/
+
+- name: Install nginx pkg
+  yum: name={{ item }} state=present
+  with_items:
+    - nginx
+    - createrepo
+    - rsync
+    - net-tools
+
+- name: Copy nginx server conf file
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify:
+    - nginx_server_restart
+
+#- name: Copy yum sync scripts
+#  template: src=rsync.sh.j2 dest=/etc/init.d/rsync.sh mode=655

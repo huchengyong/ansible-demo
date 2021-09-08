@@ -1,0 +1,21 @@
+---
+- name: Install lvm base pkg
+  yum: name={{ item }} state=present
+  with_items:
+    - lvm2
+
+- name: filesystem | Create pv,vg,lv and file systems
+  lvg: vg=vg_data  pvs=/dev/sdb
+
+- name: filesystem | create lv
+  lvol: vg=vg_data  lv=lv_data  size=100%FREE
+  ignore_errors: True
+
+- name: filesystem | create xfs
+  filesystem: fstype=xfs dev=/dev/vg_data/lv_data
+
+- name: Creates directory
+  file: path={{ disk_data_dir }} state=directory
+
+- name: filesytem | mount dir
+  mount: name={{ disk_data_dir }} src=/dev/vg_data/lv_data fstype=xfs state=mounted

@@ -1,0 +1,21 @@
+---
+- name: install iptables.service
+  yum: name=iptables-services state=latest
+  tags: ntp_server
+
+- name: Config ntp iptables
+  iptables:
+    action: insert
+    chain: INPUT
+    jump: ACCEPT
+    protocol: udp
+    match: multiport
+    destination_port: 123
+  tags: ntp_server
+
+- name: Insert tcp rule to /etc/sysconfig/iptables
+  lineinfile:
+    path: /etc/sysconfig/iptables
+    insertafter: '^:OUTPUT ACCEPT '
+    line: '-A INPUT -p udp -m multiport --dport 123 -j ACCEPT'
+  tags: ntp_server

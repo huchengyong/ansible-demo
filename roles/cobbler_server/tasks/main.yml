@@ -1,0 +1,18 @@
+---
+- include: install_config_cobbler_server.yml
+  tags: cobbler_server_install
+#- include: system_images_import_centos6_5.yml
+#- include: system_images_import_centos7_2.yml
+#- include: system_images_import_centos7_3.yml
+#  tags: cobbler_server_install
+#- include: system_images_import_centos7_4.yml
+#  tags: cobbler_server_install
+- include: system_images_import_centos7_6.yml
+  tags: cobbler_server_install
+#- include: system_images_import_esxi6_0.yml
+#  tags: cobbler_server_install
+#- include: custom_mode_install_system.yml
+#  tags: 
+#    - cobbler_server_install
+#    - custom_mode_install
+#- include: ipmitool_install_config.yml

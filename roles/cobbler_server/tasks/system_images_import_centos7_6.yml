@@ -1,0 +1,26 @@
+---
+- name: Copy centos7.6 ks automatically answer files
+  template: src=centos-7.6-x86_64.cfg dest=/tmp/
+  tags: images_centos7_6
+
+- name: mkdir ks_config
+  shell: mkdir -p /var/www/html/ks_config/7.6 -p
+  tags: images_centos7_6
+
+- name: Down kernel
+  shell: curl -o /var/www/html/ks_config/7.6/kernel-3.10.0-957.5.1.el7.x86_64.rpm http://{{ yum_repo_host }}/ctyun/centos-iso/kernel-3.10.0-957.5.1.el7.x86_64.rpm
+  tags: images_centos7_6
+
+#- name: Copy centos7.6 ks automatically answer files
+#  template: src=system_init.sh dest=/var/www/html/ks_config/
+#  tags: images_centos7_6
+
+- name: Copy the script that imports centos7.6 the mirror
+  template: src={{ item }} dest=/tmp/
+  with_items:
+    - cobbler_image_import.sh
+  tags: images_centos7_6
+
+- name: Import_images_centos7_6
+  shell: sh /tmp/cobbler_image_import.sh centos7_6
+  tags: images_centos7_6

@@ -1,0 +1,14 @@
+---
+- name: Copy esxi6.0 ks automatically answer files
+  copy: src=esxi-6.0-x86_64.cfg dest=/tmp/
+  tags: images_esxi6_0
+
+- name: Copy the script that imports esxi6.0 the mirror
+  template: src={{ item }} dest=/tmp/
+  with_items:
+    - cobbler_image_import.sh
+  tags: images_esxi6_0
+
+- name: Import_images_esxi6_0
+  shell: sh /tmp/cobbler_image_import.sh esxi6_0
+  tags: images_esxi6_0

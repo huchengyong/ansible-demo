@@ -1,0 +1,6 @@
+---
+- include: disk_local_mount_config.yml
+- include: yum_iptables_config.yml 
+- include: yum_server_install.yml
+- include: yum_clean_mem.yml
+- include: yum_server_manager.yml

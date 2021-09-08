@@ -1,0 +1,20 @@
+cobbler_iptables_accept_tcp_port:
+  - 25151
+  - 80
+  - 443
+cobbler_iptables_accept_udp_port:
+  - 69
+cobbler_image_ip_centos6_5: http://110.76.187.100/centos-iso/CentOS-6.5-x86_64-minimal.iso
+cobbler_image_ip_centos7_2: http://110.76.187.100/centos-iso/CentOS-7-x86_64-Minimal-1511.iso
+cobbler_image_ip_centos7_3: http://10.129.177.9/test/centos-iso/CentOS-7-x86_64-Minimal-1611.iso
+cobbler_image_ip_centos7_4: http://10.129.177.9/test/centos-iso/CentOS-7-x86_64-Minimal-1611.iso
+cobbler_image_ip_esxi6_0: http://10.129.177.9/test/centos-iso/CentOS-7-x86_64-Minimal-1611.iso
+yum_repo_host: "10.129.178.104"
+cobber_server_host: "192.168.56.18"
+dhcp_network: "192.168.56.0"
+dhcp_netmask: "255.255.255.0"
+dhcp_gateway: "192.168.56.1"
+dhcp_start_ip: "192.168.56.240"
+dhcp_stop_ip: "192.168.56.251"
+dns_server_host: "114.114.114.114"
+cobbler_image_ip_centos7_6: "http://{{ yum_repo_host }}/ctyun/centos-iso/iso/CentOS/CentOS-7-x86_64-Minimal-1810.iso"

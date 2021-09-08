@@ -1,0 +1,36 @@
+---
+#- include: ntp_iptables_config.yml
+- name: Be sure ntpd or chronyd is stop
+  service: name={{ item }} state=stopped
+  with_items:
+    - ntpd
+    - chronyd
+  ignore_errors: True
+  tags: ntp_server
+
+- name: Be sure chronyd is disabled
+  service: name=chronyd state=stopped enabled=no
+  ignore_errors: True
+  tags: ntp_server
+
+- name: Init sync time
+  shell: hwclock -w ; ntpdate ntp1.aliyun.com ; hwclock -w
+  ignore_errors: True
+  tags: ntp_server
+
+- name: Install ntpd
+  yum: name=ntp state=present
+  tags: ntp_server
+
+- name: Copy the ntpd configuration file
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  notify: Restart ntpd
+  tags: ntp_server
+
+- name: Be sure ntpd is running and enabled
+  service: name=ntpd state=restarted enabled=yes
+  tags: ntp_server
+
+- name: Crontab start ntpd server scripts
+  cron: name='Run ntpd server' minute=*/5 hour=* day=* month=* weekday=* job="/usr/bin/systemctl start ntpd &>/dev/null"
+  tags: ntp_server

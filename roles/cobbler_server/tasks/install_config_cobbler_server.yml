@@ -1,0 +1,66 @@
+---
+- name: Config accept tcp rule insert to cobbler iptables
+  iptables: action=insert chain=INPUT jump=ACCEPT protocol=tcp destination_port={{ item }}
+  notify:
+    - Insert tcp rule to /etc/sysconfig/iptables
+  with_items:
+    - "{{ cobbler_iptables_accept_tcp_port }}"
+  tags: iptables_cobbler_rule_config
+
+- name: Config accept udp rule insert to cobbler iptables
+  iptables: action=insert chain=INPUT jump=ACCEPT protocol=udp destination_port={{ item }}
+  notify:
+    - Insert udp rule to /etc/sysconfig/iptables
+  with_items:
+    - "{{ cobbler_iptables_accept_udp_port }}"
+  tags: iptables_cobbler_rule_config
+
+- name: Install cobbler related packages
+  yum: name={{ item }} state=present
+  with_items:
+    - cobbler
+    - cobbler-web
+    - dhcp
+    - tftp-server
+    - pykickstart
+    - httpd
+    - xinetd
+    - wget
+    - iptables-services
+    - vim
+  tags: install_config_cobbler_server
+
+- name: Copy settings config file
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: 'settings', dest: '/etc/cobbler/' }
+    - { src: 'dhcp.template', dest: '/etc/cobbler/' }
+    - { src: 'dhcpd.conf', dest: '/etc/dhcp/' }
+  tags: install_config_cobbler_server
+
+- name: Copy tftp config file
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: 'tftp', dest: '/etc/xinetd.d/' }
+  tags: install_config_cobbler_server
+
+- name: Copy cobbler.get-loaders config file
+  copy: src={{ item }} dest=/var/lib/cobbler/loaders/
+  with_fileglob:
+      - cobbler-get-loaders/*
+  tags: install_config_cobbler_server
+
+- name: Start the Apache cobblerd xinetd service
+  service: name={{ item }} state=restarted enabled=yes
+  with_items:
+    - httpd
+    - cobblerd
+    - xinetd
+    - dhcpd
+    - rsyncd
+  tags: install_config_cobbler_server
+
+- name: Synchronize the cobbler related configuration file
+  shell: cobbler sync
+  tags: install_config_cobbler_server
+

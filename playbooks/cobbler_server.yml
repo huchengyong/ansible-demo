@@ -1,0 +1,4 @@
+---
+- hosts: cobbler_server
+  roles:
+    - cobbler_server

@@ -1,0 +1,14 @@
+---
+- name: Copy centos7.2 ks automatically answer files
+  copy: src=centos-7.2-x86_64.cfg dest=/tmp/
+  tags: images_centos7_2
+
+- name: Copy the script that imports centos7.2 the mirror
+  template: src={{ item }} dest=/tmp/
+  with_items:
+    - cobbler_image_import.sh
+  tags: images_centos7_2
+
+- name: Import_images_centos7_2
+  shell: sh /tmp/cobbler_image_import.sh centos7_2
+  tags: images_centos7_2

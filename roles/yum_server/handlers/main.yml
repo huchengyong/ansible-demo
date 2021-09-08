@@ -1,0 +1,3 @@
+---
+- name: nginx_server_restart
+  service: name=nginx state=restarted enabled=yes

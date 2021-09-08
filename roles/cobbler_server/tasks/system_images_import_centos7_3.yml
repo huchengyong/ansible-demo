@@ -1,0 +1,18 @@
+---
+- name: Copy centos7.3 ks automatically answer files
+  copy: src=centos-7.3-x86_64.cfg dest=/tmp/
+  tags: images_centos7_3
+
+- name: Copy the script that imports centos7.3 the mirror
+  template: src={{ item }} dest=/tmp/
+  with_items:
+    - cobbler_image_import.sh
+  tags: images_centos7_3
+
+- name: Import_images_centos7_3
+  shell: sh /tmp/cobbler_image_import.sh centos7_3
+  tags: images_centos7_3
+
+- name: Default install centos-7.3-x86_64
+  shell: cobbler system add --name=default --profile=centos-7.3-x86_64 ; cobbler sync
+  tags: default_install

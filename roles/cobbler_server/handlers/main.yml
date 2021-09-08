@@ -1,0 +1,16 @@
+---
+- name: Insert tcp rule to /etc/sysconfig/iptables
+  lineinfile:
+    path: /etc/sysconfig/iptables
+    insertafter: '^:OUTPUT ACCEPT '
+    line: '-A INPUT -p tcp -m tcp --dport {{ item }} -j ACCEPT'
+  with_items:
+     - "{{ cobbler_iptables_accept_tcp_port }}"
+
+- name: Insert udp rule to /etc/sysconfig/iptables
+  lineinfile:
+    path: /etc/sysconfig/iptables
+    insertafter: '^:OUTPUT ACCEPT '
+    line: '-A INPUT -p udp -m udp --dport {{ item }} -j ACCEPT'
+  with_items:
+    - "{{ cobbler_iptables_accept_udp_port }}"

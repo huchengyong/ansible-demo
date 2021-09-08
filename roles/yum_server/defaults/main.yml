@@ -1,0 +1,6 @@
+---
+yum_server_iptables_accept_port:
+  - 80
+disk_data_name: /dev/sdb
+disk_data_dir: /data
+yum_data_dir: /data/repo/yum/

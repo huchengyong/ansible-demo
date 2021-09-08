@@ -1,0 +1,5 @@
+---
+- hosts: ntp_server
+  gather_facts: no
+  roles:
+    - ntp_server

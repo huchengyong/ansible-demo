@@ -1,0 +1,11 @@
+---
+- name: Copy custom_mode_install_system.sh.j2 file to /tmp/
+  template: src=custom_mode_install_system.sh.j2 dest=/tmp/custom_mode_install_system.sh
+
+- name: Insert tcp rule to /tmp/custom_mode_install_system.sh.j2
+  lineinfile:
+    path: /tmp/custom_mode_install_system.sh
+    insertafter: '^###'
+    line: '{{ item }}'
+  with_items:
+    - "{{ custom_mode_install_system_rule }}"

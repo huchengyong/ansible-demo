@@ -1,0 +1,16 @@
+---
+- name: install iptables.service
+  yum: name=iptables-services state=latest
+
+- name: Config yum server iptables rule
+  iptables: action=insert chain=INPUT protocol=tcp destination_port={{ item }} jump=ACCEPT
+  with_items:
+    - "{{ yum_server_iptables_accept_port }}"
+
+- name: Insert tcp rule to /etc/sysconfig/iptables
+  lineinfile:
+    path: /etc/sysconfig/iptables
+    insertafter: '^:OUTPUT ACCEPT '
+    line: '-A INPUT -p tcp -m tcp --dport {{ item }} -j ACCEPT'
+  with_items:
+    - "{{ yum_server_iptables_accept_port }}"

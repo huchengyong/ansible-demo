@@ -1,0 +1,9 @@
+---
+- name: Data disk format xfs
+  filesystem: fstype=xfs dev={{ disk_data_name }}
+
+- name: Create data directory
+  file: path=/data/ state=directory
+
+- name: Data disk init mount
+  mount: path=/data/ src={{ disk_data_name }} fstype=xfs state=mounted

@@ -1,0 +1,24 @@
+---
+- name: Kill rsync yum scripts
+  shell: ps -ef|grep rsync|grep -v grep|awk '{print "kill -KILL",$2}'|bash
+  tags: kill_rsync_yum
+
+- name: Install rsync pkg
+  yum: name={{ item }} state=present
+  with_items:
+    - createrepo
+    - rsync
+    - net-tools
+  tags: run_rsync_yum
+
+- name: Mkdir yum dir
+  shell: mkdir -p /script/
+  tags: run_rsync_yum
+
+- name: Copy rsync yum ct os scripts
+  template: src=pull_yum_rsync.sh dest=/script/pull_yum_rsync.sh
+  tags: run_rsync_yum
+
+- name: Crontab clean mem scripts
+  cron: name='Rsync yum ctyun os' minute=10 hour=*/2 day=* month=* weekday=* job="flock -xn /var/run/pull_yum_rsync.lock -c \"/bin/sh /script/pull_yum_rsync.sh &>/dev/null\""
+  tags: run_rsync_yum

@@ -1,0 +1,9 @@
+driftfile /var/lib/ntp/drift
+restrict default nomodify notrap nopeer noquery
+restrict 127.0.0.1
+restrict ::1
+server ntp1.aliyun.com iburst
+#server  127.127.1.0  iburst
+includefile /etc/ntp/crypto/pw
+keys /etc/ntp/keys
+disable monitor

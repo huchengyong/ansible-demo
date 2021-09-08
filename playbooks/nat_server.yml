@@ -1,0 +1,5 @@
+---
+- hosts: nat_server
+  gather_facts: no
+  roles:
+    - nat_server
