@@ -4,7 +4,7 @@
 1.配置hosts文件
 ```
 [yum_server]
-192.168.56.14
+192.168.56.13
 
 [all:vars]
 ansible_ssh_port=10000
@@ -79,3 +79,16 @@ synchronised to NTP server (120.25.115.20) at stratum 3
    time correct to within 962 ms
    polling server every 64 s
 ```
+
+## cobbler_server部署（离线包版本）
+```
+cobbler安装包下载公网地址
+wget -c http://124.236.120.248:50001/ctyun/centos-iso/cobbler-offline-2.8.4_210707-1.x86_64.rpm
+cobbler安装包下载私网地址(需提前同步YUM)
+wget -c http://yum_server_ip/ctyun/centos-iso/cobbler-offline-2.8.4_210707-1.x86_64.rpm
+```
+
+## cobbler_server部署（YUM版本）
+
+
+
