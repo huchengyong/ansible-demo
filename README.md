@@ -105,6 +105,40 @@ ansible_become=yes
 ansible_become_method=sudo
 ansible_become_user=root
 ```
+2.配置cobbler-server变量配置文件
+```
+[root@localhost service]# vim roles/cobbler_server/vars/main.yml 
+cobbler_iptables_accept_tcp_port:
+  - 25151
+  - 80
+  - 443
+cobbler_iptables_accept_udp_port:
+  - 69
+cobbler_image_ip_centos6_5: http://110.76.187.100/centos-iso/CentOS-6.5-x86_64-minimal.iso
+cobbler_image_ip_centos7_2: http://110.76.187.100/centos-iso/CentOS-7-x86_64-Minimal-1511.iso
+cobbler_image_ip_centos7_3: http://10.129.177.9/test/centos-iso/CentOS-7-x86_64-Minimal-1611.iso
+cobbler_image_ip_centos7_4: http://10.129.177.9/test/centos-iso/CentOS-7-x86_64-Minimal-1611.iso
+cobbler_image_ip_esxi6_0: http://10.129.177.9/test/centos-iso/CentOS-7-x86_64-Minimal-1611.iso
+yum_repo_host: "10.129.178.104"
+cobber_server_host: "192.168.56.18"
+dhcp_network: "192.168.56.0"
+dhcp_netmask: "255.255.255.0"
+dhcp_gateway: "192.168.56.1"
+dhcp_start_ip: "192.168.56.240"
+dhcp_stop_ip: "192.168.56.251"
+dns_server_host: "114.114.114.114"
+cobbler_image_ip_centos7_6: "http://{{ yum_repo_host }}/ctyun/centos-iso/CentOS-7-x86_64-Minimal-1810.iso"
+```
+3.执行 cobbler_server playbooks
+```
+[root@localhost service]# ansible-playbook playbooks/cobbler_server.yml  
+```
+4.检查cobbler服务状态
+```
+[root@linux-node18 ~]# systemctl status httpd cobblerd  dhcpd xinetd
+[root@linux-node18 ~]# cobbler distro list  # 查看镜像列表
+   centos-7.6-x86_64 (出现7.6的系统则表示成功)
+```
 
 
 
