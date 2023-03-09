@@ -1,0 +1,48 @@
+---
+- name: Add CN2 IP routes to route file
+  vars:
+    routes:
+      - network: "10.249.87.0/24"
+        via: "{{ CN2_gateway }}"
+    route_file: "/etc/sysconfig/network-scripts/route-{{ NIC_name }}"
+  template:
+    src: ../templates/route.j2
+    dest: "{{ route_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: CN2_gateway is defined and CN2_gateway != ""
+
+- name: Check CN2 connectivity to gateways
+  wait_for:
+    host: "{{ item }}"
+    timeout: 5
+  with_items:
+    - "10.249.87.254"
+    # - "10.252.135.254"
+    # - "10.254.181.1"
+    # - "10.255.243.126"
+  when: CN2_gateway is defined and CN2_gateway != ""
+
+- name: Add public IP routes to route file
+  vars:
+    routes:
+      - network: "49.7.0.0/24"
+        via: "{{ public_gateway }}"
+    route_file: "/etc/sysconfig/network-scripts/route-{{ NIC_name }}"
+  template:
+    src: ../templates/route.j2
+    dest: "{{ route_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: public_gateway is defined and public_gateway != ""
+
+- name: Check public connectivity to gateways
+  wait_for:
+    host: "{{ item }}"
+    timeout: 5
+  with_items:
+    - "49.7.0.254"
+    # - "124.236.120.254"
+  when: public_gateway is defined and public_gateway != ""

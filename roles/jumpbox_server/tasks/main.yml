@@ -1,0 +1,19 @@
+---
+- name: Playbook to jumbox server
+  hosts: jumpbox_server
+  become: true
+  vars:
+    ssh_key_dir: "/root/.ssh"
+    ssh_key_comment: "jumpbox_server"
+    ssh_key_passphrase: "password"
+    public_key_file: "/tmp/{{ ssh_key_comment }}.pub"
+
+  tasks:
+    - name: Configure SSH and Networking
+      include_tasks: configure_ssh_networking.yml
+    # - name: Generate SSH secret
+    #   include_tasks: generate_ssh_secret.yml
+    # - name: Install QinTeng Agent
+    #   include_tasks: install_qinteng_agent.yml
+    # - name: Add IP Route
+    #   include_tasks: ip_route_table.yml

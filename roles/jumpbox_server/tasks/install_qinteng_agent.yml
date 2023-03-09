@@ -1,0 +1,36 @@
+---
+- name: Install QinTeng Agent On {{ os_image }}
+  shell: |
+    {% if os_image == "windows" and CN2_gateway is defined and CN2_gateway != "" %}
+      powershell.exe -Command \"$URL='http://10.246.182.242:8002/plugins/v3.400.1004-win64/TitanAgent_for_All_x86_64.exe'; $FILE=$env:temp + '\TitanAgent_for_All.exe';((New-Object System.Net.WebClient).DownloadFile($URL, $FILE))\" & %TEMP%\TitanAgent_for_All.exe --silent=yes --cover-conf=yes --cover-app=yes --url='http://10.246.182.242:10000/agent/winDownloader?k=6105e15185ee5040b9e68be2892d2585133ffa65&group=22&protocol=0' --install-path='C:\Program Files\TitanAgent' --agent_name='TitanAgent.exe' --guard_name='titan_guard.exe' --monitor_name='TitanMonitor.exe'
+    {% elif os_image == "windows" and public_gateway is defined and public_gateway != "" %}
+      powershell.exe -Command \"$URL='http://182.42.147.191:8002/plugins/v3.400.1003-win64/TitanAgent_for_All_x86_64.exe'; $FILE=$env:temp + '\TitanAgent_for_All.exe';((New-Object System.Net.WebClient).DownloadFile($URL, $FILE))\" & %TEMP%\TitanAgent_for_All.exe --silent=yes --cover-conf=yes --cover-app=yes --url='http://182.42.147.191:10000/agent/winDownloader?k=7ddf43dd0ee88a4aad2b93c93327bf7d9a1a3a5a&group=246&protocol=0' --install-path='C:\Program Files\TitanAgent' --agent_name='TitanAgent.exe' --guard_name='titan_guard.exe' --monitor_name='TitanMonitor.exe'
+    {% elif os_image == "linux" and CN2_gateway is defined and CN2_gateway != "" %}
+      curl -s -L 'http://10.246.182.242:10000/agent/download?k=6105e15185ee5040b9e68be2892d2585133ffa65&group=6&protocol=0&root=true&runAccount=root&userAdd=false&certId=6e7a8738071c62285426a8b1638835b9' | bash
+    {% elif os_image == "linux" and public_gateway is defined and public_gateway != "" %}
+      curl -s -L 'http://182.42.147.191:10000/agent/download?k=7ddf43dd0ee88a4aad2b93c93327bf7d9a1a3a5a&group=57&protocol=0&root=true&runAccount=root&userAdd=false' | bash
+    {% endif %}
+
+# - name: Install qinteng agent on Linux hosts
+#   when: "os_image == 'linux'"
+#   block:
+#     - name: Install qinteng agent via public internet on Linux
+#       command: "curl -s -L 'http://182.42.147.191:10000/agent/download?k=7ddf43dd0ee88a4aad2b93c93327bf7d9a1a3a5a&group=57&protocol=0&root=true&runAccount=root&userAdd=false' | bash"
+#       register: curl_output
+#       when: "public_gateway is defined and public_gateway != ''"
+
+#     - name: Install qinteng agent via CN2 network on Linux
+#       command: "curl -s -L 'http://10.246.182.242:10000/agent/download?k=6105e15185ee5040b9e68be2892d2585133ffa65&group=6&protocol=0&root=true&runAccount=root&userAdd=false&certId=6e7a8738071c62285426a8b1638835b9' | bash"
+#       register: curl_output
+#       when: "CN2_gateway is defined and CN2_gateway != ''"
+
+# - name: Install qinteng agent on Windows hosts
+#   when: "os_image == 'windows'"
+#   block:
+#     - name: Install qinteng agent via public internet on Windows
+#       win_command: "Powershell.exe -Command \"$URL='http://182.42.147.191:8002/plugins/v3.400.1003-win64/TitanAgent_for_All_x86_64.exe'; $FILE=$env:temp + '\\TitanAgent_for_All.exe';((New-Object System.Net.WebClient).DownloadFile($URL, $FILE))\" & %TEMP%\\TitanAgent_for_All.exe --silent=yes --cover-conf=yes --cover-app=yes --url='http://182.42.147.191:10000/agent/winDownloader?k=7ddf43dd0ee88a4aad2b93c93327bf7d9a1a3a5a&group=246&protocol=0' --install-path='C:\\Program Files\\TitanAgent' --agent_name='TitanAgent.exe' --guard_name='titan_guard.exe' --monitor_name='TitanMonitor.exe'"
+#       when: "network_segment == 'public'"
+
+#     - name: Install qinteng agent via CN2 network on Windows
+#       win_command: "Powershell.exe -Command \"$URL='http://10.246.182.242:8002/plugins/v3.400.1004-win64/TitanAgent_for_All_x86_64.exe'; $FILE=$env:temp + '\\TitanAgent_for_All.exe';((New-Object System.Net.WebClient).DownloadFile($URL, $FILE))\" & %TEMP%\\TitanAgent_for_All.exe --silent=yes --cover-conf=yes --cover-app=yes --url='http://10.246.182.242:10000/agent/winDownloader?k=6105e15185ee5040b9e68be2892d2585133ffa65&group=22&protocol=0' --install-path='C:\\Program Files\\TitanAgent' --agent_name='TitanAgent.exe' --guard_name='titan_guard.exe' --monitor_name='TitanMonitor.exe'"
+#       when: "network_segment == 'cn2'"

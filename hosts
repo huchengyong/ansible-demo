@@ -10,6 +10,9 @@
 [nat_server]
 192.168.56.14
 
+[jumpbox_server]
+172.31.21.238 ansible_ssh_port=22 ansible_ssh_user=root ansible_ssh_pass=ideal@123 CN2_gateway=10.249.87.254 public_gateway=49.7.0.254 NIC_name=eth0 os_image=linux
+
 [all:vars]
 ansible_ssh_port=10000
 ansible_ssh_user=root

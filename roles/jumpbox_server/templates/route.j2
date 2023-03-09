@@ -1,0 +1,3 @@
+{% for route in routes %}
+{{ route.network }} via {{ route.via }} dev {{ NIC_name }}
+{% endfor %}

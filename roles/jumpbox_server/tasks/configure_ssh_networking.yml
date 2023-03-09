@@ -1,0 +1,48 @@
+---
+# - name: Add iptables rule to allow incoming SSH on port 51351
+#   iptables:
+#     chain: INPUT
+#     protocol: tcp
+#     destination_port: 51351
+#     jump: ACCEPT
+#     comment: "Allow SSH on port 51351"
+
+# - name: Update SSH port in sshd_config
+#   lineinfile:
+#     path: /etc/ssh/sshd_config
+#     regexp: "^#?Port\\s+22"
+#     line: "Port 51351"
+#     state: present
+#     backup: yes
+#     insertafter: "#Port 22"
+
+# - name: Restart SSHD service
+#   service:
+#     name: sshd
+#     state: restarted
+
+# - name: Set minimum password length to 16
+#   lineinfile:
+#     path: /etc/security/pwquality.conf
+#     regexp: '^minlen'
+#     line: 'minlen = 16'
+
+# - name: Disable route redirects
+#   sysctl:
+#     name: net.ipv4.conf.all.accept_redirects
+#     value: 0
+#     state: present
+#     reload: yes
+
+- name: Disable default gateway in network config
+  lineinfile:
+    path: /etc/sysconfig/network
+    regexp: '^GATEWAY='
+    line: 'GATEWAY='
+    state: present
+    backup: yes
+
+# - name: Restart network service
+#   service:
+#     name: network
+#     state: restarted
